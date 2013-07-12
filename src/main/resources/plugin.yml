@@ -1,0 +1,43 @@
+name: CubeSpawner
+main: fr.areku.mc.CubeSpawner.CubeSpawner
+author: ThisIsAreku
+website: http://areku.fr/
+version: $VERSION$
+description: Why only monster spawner ?
+commands:
+    cubespawner:
+        description: Configure Cube Spawner
+        aliases: [cs]
+        permission: cubespawner.admin
+    cubespawner-place:
+        description: Configure Cube Spawner
+        aliases: [csp]
+        permission: cubespawner.admin
+        usage: |
+          /<command> [direction] [block] [data] [delay]
+          [direction] can be N,S,E,W,T,B
+          [delay] in seconds
+          Example: /<command> B SAND 0 0
+    cubespawner-multiple:
+        description: Place multiple Cube Spawner
+        aliases: [csm]
+        permission: cubespawner.admin
+        usage: |
+          /<command> [direction] [block] [data] [delay]
+          [direction] can be N,S,E,W,T,B
+          [delay] in seconds
+          Example: /<command> B SAND 0 0
+          /<command> stop - stop placing spawner
+    cubespawner-edit:
+        description: Edit a Cube Spawner
+        aliases: [cse]
+        permission: cubespawner.admin
+        usage: |
+          /<command> [direction] [block] [data] [delay]
+          [direction] can be N,S,E,W,T,B
+          [delay] in seconds
+          Example: /<command> B SAND 0 0
+permissions:
+    cubespawner.admin:
+        description: Allow to place and destroy Cube spawner
+        default: op
