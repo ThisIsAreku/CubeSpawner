@@ -66,6 +66,7 @@ public class EventListener implements Listener {
 					event.getPlayer().sendMessage(
 							ChatColor.RED + "It was not a Cube spawner .. :/");
 				}
+                event.setCancelled(true);
 			}
 		CubeSpawner.handleSpawnerMoving(event.getClickedBlock());
 	}

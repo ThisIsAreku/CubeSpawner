@@ -4,132 +4,136 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 
 public class CubeSpawnerBlock {
-	public enum SpawnDirection {
-		TOP, BOTTOM, NORTH, SOUTH, EAST, WEST;
-		public static SpawnDirection matchDirection(String dir) {
-			String v = dir.toLowerCase();
-			if ("t".equals(v) || "top".equals(v)) {
-				return TOP;
-			} else if ("b".equals(v) || "bottom".equals(v)) {
-				return BOTTOM;
-			} else if ("n".equals(v) || "north".equals(v)) {
-				return NORTH;
-			} else if ("s".equals(v) || "south".equals(v)) {
-				return SOUTH;
-			} else if ("e".equals(v) || "east".equals(v)) {
-				return EAST;
-			} else if ("w".equals(v) || "west".equals(v)) {
-				return WEST;
-			}
-			return null;
-		}
-	}
+    public enum SpawnDirection {
+        TOP, BOTTOM, NORTH, SOUTH, EAST, WEST;
 
-	public enum SpawnMode {
-		FREE_SPACE, TIMED
-	}
+        public static SpawnDirection matchDirection(String dir) {
+            if (dir == null || dir.length() == 0)
+                return null;
+            String dS;
+            for (SpawnDirection d : SpawnDirection.values()) {
+                dS = d.toString();
+                if (dS.equalsIgnoreCase(dir) || dS.charAt(0) == dir.charAt(0))
+                    return d;
+            }
+            return null;
+        }
+    }
 
-	private Material cubeMaterial;
-	private byte cubeData;
+    public enum SpawnMode {
+        FREE_SPACE, TIMED
+    }
 
-	private Location spawnerLocation;
-	private SpawnDirection spawnerDirection;
-	private SpawnMode spawnerMode;
-	private int spawnerDelay;
+    private Material cubeMaterial;
+    private byte cubeData;
 
-	private Location shiftedLocation = null;
-	private long lastSpawn = 0;
+    private Location spawnerLocation;
+    private SpawnDirection spawnerDirection;
+    private SpawnMode spawnerMode;
+    private int spawnerDelay;
+    private boolean spawnerRedstoneEnabled;
 
-	CubeSpawnerBlock(Material material, byte data, Location loc,
-			SpawnDirection direction, SpawnMode mode, int delay) {
-		cubeMaterial = material;
-		cubeData = data;
-		spawnerLocation = loc;
-		spawnerDirection = direction;
-		spawnerMode = mode;
-		spawnerDelay = delay;
-	}
+    private Location shiftedLocation = null;
+    private long lastSpawn = 0;
 
-	public Material getCubeMaterial() {
-		return cubeMaterial;
-	}
+    CubeSpawnerBlock(Material material, byte data, Location loc,
+                     SpawnDirection direction, SpawnMode mode, int delay, boolean redstoneEnabled) {
+        cubeMaterial = material;
+        cubeData = data;
+        spawnerLocation = loc;
+        spawnerDirection = direction;
+        spawnerMode = mode;
+        spawnerDelay = delay;
+        spawnerRedstoneEnabled = redstoneEnabled;
+    }
 
-	public byte getCubeData() {
-		return cubeData;
-	}
+    public Material getCubeMaterial() {
+        return cubeMaterial;
+    }
 
-	public Location getSpawnerLocation() {
-		return spawnerLocation;
-	}
+    public byte getCubeData() {
+        return cubeData;
+    }
 
-	public SpawnDirection getSpawnerDirection() {
-		return spawnerDirection;
-	}
+    public Location getSpawnerLocation() {
+        return spawnerLocation;
+    }
 
-	public SpawnMode getSpawnMode() {
-		return spawnerMode;
-	}
+    public SpawnDirection getSpawnerDirection() {
+        return spawnerDirection;
+    }
 
-	public int getDelay() {
-		return spawnerDelay;
-	}
+    public SpawnMode getSpawnMode() {
+        return spawnerMode;
+    }
 
-	public boolean exist() {
-		return (!spawnerLocation.getBlock().isEmpty());
-	}
+    public int getDelay() {
+        return spawnerDelay;
+    }
 
-	public boolean isNear(Location loc) {
-		return ((Math.abs(spawnerLocation.getBlockX() - loc.getBlockX()) == 1)
-				|| (Math.abs(spawnerLocation.getBlockY() - loc.getBlockY()) == 1) || (Math
-					.abs(spawnerLocation.getBlockZ() - loc.getBlockZ()) == 1));
-	}
+    public boolean isRedstoneEnabled() {
+        return spawnerRedstoneEnabled;
+    }
 
-	public boolean canSpawn() {
-		return (shiftLocation().getBlock().isEmpty() && (spawnerLocation
-				.getWorld().getFullTime() - lastSpawn > spawnerDelay));
-	}
+    public boolean exist() {
+        return (!spawnerLocation.getBlock().isEmpty());
+    }
 
-	public void doSpawn() {
-		if (canSpawn()) {
-			lastSpawn = spawnerLocation.getWorld().getFullTime();
-			shiftLocation().getBlock().setTypeIdAndData(cubeMaterial.getId(),
-					cubeData, true);
-			CubeSpawner.d("doSpawn:" + this.toString());
-		}
-	}
+    public boolean isNear(Location loc) {
+        return ((Math.abs(spawnerLocation.getBlockX() - loc.getBlockX()) == 1)
+                || (Math.abs(spawnerLocation.getBlockY() - loc.getBlockY()) == 1) || (Math
+                .abs(spawnerLocation.getBlockZ() - loc.getBlockZ()) == 1));
+    }
 
-	private Location shiftLocation() {
-		if (shiftedLocation == null) {
-			shiftedLocation = spawnerLocation.clone();
-			switch (spawnerDirection) {
-			case TOP:
-				shiftedLocation.add(0, 1, 0);
-				break;
-			case BOTTOM:
-				shiftedLocation.add(0, -1, 0);
-				break;
-			case EAST:
-				shiftedLocation.add(-1, 0, 0);
-				break;
-			case NORTH:
-				shiftedLocation.add(0, 0, -1);
-				break;
-			case SOUTH:
-				shiftedLocation.add(0, 0, 1);
-				break;
-			case WEST:
-				shiftedLocation.add(1, 0, 0);
-				break;
-			}
-		}
-		return shiftedLocation;
-	}
+    public boolean canSpawn() {
+        boolean can = (shiftLocation().getBlock().isEmpty() && (spawnerLocation
+                .getWorld().getFullTime() - lastSpawn > spawnerDelay));
+        if (spawnerRedstoneEnabled)
+            can = can && spawnerLocation.getBlock().isBlockPowered();
+        return can;
+    }
 
-	@Override
-	public String toString() {
-		return "{" + cubeMaterial + ":" + cubeData + ", "
-				+ spawnerLocation.toString() + ", " + spawnerDirection + ", "
-				+ spawnerMode + ", " + spawnerDelay + "}";
-	}
+    public void doSpawn() {
+        if (canSpawn()) {
+            lastSpawn = spawnerLocation.getWorld().getFullTime();
+            shiftLocation().getBlock().setTypeIdAndData(cubeMaterial.getId(),
+                    cubeData, true);
+            CubeSpawner.d("doSpawn:" + this.toString());
+        }
+    }
+
+    private Location shiftLocation() {
+        if (shiftedLocation == null) {
+            shiftedLocation = spawnerLocation.clone();
+            switch (spawnerDirection) {
+                case TOP:
+                    shiftedLocation.add(0, 1, 0);
+                    break;
+                case BOTTOM:
+                    shiftedLocation.add(0, -1, 0);
+                    break;
+                case EAST:
+                    shiftedLocation.add(-1, 0, 0);
+                    break;
+                case NORTH:
+                    shiftedLocation.add(0, 0, -1);
+                    break;
+                case SOUTH:
+                    shiftedLocation.add(0, 0, 1);
+                    break;
+                case WEST:
+                    shiftedLocation.add(1, 0, 0);
+                    break;
+            }
+        }
+        return shiftedLocation;
+    }
+
+    @Override
+    public String toString() {
+        return "{" + cubeMaterial + ":" + cubeData + ", "
+                + spawnerLocation.toString() + ", " + spawnerDirection + ", "
+                + spawnerMode + ", " + spawnerDelay + "}";
+    }
 
 }
