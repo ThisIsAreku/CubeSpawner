@@ -1,6 +1,7 @@
 package fr.areku.mc.CubeSpawner;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -18,6 +19,7 @@ import fr.areku.mc.CubeSpawner.commands.CubespawnEdit;
 import fr.areku.mc.CubeSpawner.commands.CubespawnPlace;
 import fr.areku.mc.CubeSpawner.commands.CubespawnMultiple;
 import fr.areku.mc.CubeSpawner.listeners.EventListener;
+import org.mcstats.Metrics;
 
 public class CubeSpawner extends JavaPlugin {
     private static CubeSpawner instance = null;
@@ -56,6 +58,13 @@ public class CubeSpawner extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+
+        try {
+            Metrics metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException e) {
+            // Failed to submit the stats :-(
+        }
 
         if (!getDataFolder().exists())
             getDataFolder().mkdirs();
